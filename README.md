@@ -6,12 +6,26 @@ schickt dir dann:
 - einen Discord-Ping über deinen Webhook
 - eine Push-Benachrichtigung aufs Handy über ntfy.sh
 
+Das Skript nutzt einen echten (unsichtbaren) Chromium-Browser via
+Playwright, weil das Forum durch einen Anti-Bot-Schutz (React Labs)
+abgesichert ist, der einfache Anfragen ohne JavaScript blockiert.
+Zusätzlich loggt es sich mit einem Forum-Account ein, da das Unterforum
+nur eingeloggten Nutzern angezeigt wird.
+
 ## 1. Repo anlegen
 
-1. Erstelle ein **neues, privates** GitHub-Repository (z.B. `forum-watcher`).
+1. Erstelle ein **neues, öffentliches (public)** GitHub-Repository (z.B.
+   `forum-watcher`). Public ist hier wichtig: GitHub Actions ist bei
+   öffentlichen Repos unbegrenzt kostenlos nutzbar, bei privaten Repos gibt
+   es nur ein begrenztes Minuten-Kontingent pro Monat – das würde bei einem
+   Playwright-Browser im 5-Minuten-Takt nicht reichen. Deine Zugangsdaten
+   (Schritt 5) bleiben trotzdem als verschlüsseltes Secret unsichtbar, nur
+   der Code selbst ist dann öffentlich einsehbar (unproblematisch, da nichts
+   Sensibles im Code steht).
 2. Lade die Dateien aus diesem Ordner dort hoch (`forum_watcher.py`,
    `requirements.txt`, `.github/workflows/check.yml`).
-   Am einfachsten per Drag & Drop im Browser oder mit:
+   Am einfachsten per Drag & Drop im Browser (**Add file → Upload files**,
+   kompletten Ordner reinziehen) oder mit:
    ```
    git init
    git add .
@@ -35,7 +49,7 @@ schickt dir dann:
 Das Forum verlangt einen Login, um die Beiträge zu sehen. Erstell dir dafür
 am besten einen **zweiten, separaten Account** im Forum (nicht deinen
 Haupt-Account) – nur für dieses Skript. Die Zugangsdaten kommen als
-verschlüsselte Secrets ins Repo (Schritt 5), sind also nicht öffentlich
+verschlüsseltes Secret ins Repo (Schritt 5), sind also nicht öffentlich
 einsehbar, aber ein zweiter Account ist trotzdem die sauberere Lösung.
 
 ## 4. Discord-Webhook einrichten
@@ -60,15 +74,19 @@ Im Repo: **Settings → Secrets and variables → Actions → New repository sec
 | `DISCORD_PING` | z.B. `<@&ROLLEN_ID>` oder `@everyone` (optional, kann auch leer bleiben) |
 | `NTFY_TOPIC` | das Topic aus Schritt 2, z.B. `valentin-gta-beschwerden-a8x2k` |
 
+Diese Secrets sind auch bei einem öffentlichen Repo nicht einsehbar – weder
+für andere Nutzer noch in den Actions-Logs (GitHub blendet sie automatisch
+aus).
+
 ## 6. Testen
 
 Gehe im Repo auf **Actions → Forum Watcher → Run workflow**, um es einmal
 manuell zu starten, statt 5 Minuten auf den nächsten Cron-Lauf zu warten.
 
 - **Erster Lauf:** Es werden nur alle aktuell vorhandenen Threads gespeichert
-  (Datei `seen_threads.json` wird im Repo angelegt). Es kommt bewusst noch
-  KEINE Benachrichtigung, sonst würdest du beim ersten Start für jedes
-  bestehende Thema einen Ping bekommen.
+  (Datei `seen_threads.json` wird im Repo angelegt und automatisch
+  committet). Es kommt bewusst noch KEINE Benachrichtigung, sonst würdest du
+  beim ersten Start für jedes bestehende Thema einen Ping bekommen.
 - **Ab dem zweiten Lauf:** Nur wirklich neue Themen lösen Discord-Ping +
   Push aus.
 
@@ -77,26 +95,13 @@ prüfen"):
 
 - Steht dort "Login war vermutlich NICHT erfolgreich" → Benutzername/Passwort
   in den Secrets prüfen (Tippfehler? E-Mail statt Benutzername nötig?).
-- Steht dort weiterhin eine Warnung über eine Sperrseite → siehe Abschnitt
-  "Falls das Forum weiterhin blockiert" unten.
+- Steht dort weiterhin eine Warnung über eine Sperrseite → melde dich mit
+  einem Screenshot, dann schauen wir gezielt weiter.
 - Steht dort z.B. "Erster Lauf: 20 bestehende Threads werden gespeichert" →
-  alles funktioniert, ab jetzt läuft es automatisch im Hintergrund.
-
-## Falls das Forum weiterhin blockiert
-
-Das Skript ruft die Seite jetzt per einfachem eingeloggten HTTP-Request ab
-(kein Browser mehr nötig, dafür deutlich schneller und schont dein
-Actions-Minuten-Kontingent). Falls im Log trotzdem wieder die Warnung
-"sieht nach einer Sperrseite aus" bzw. `Keine Threads gefunden` erscheint,
-kann das zwei Gründe haben:
-
-- Der Login hat nicht geklappt (siehe Warnung "Login war vermutlich NICHT
-  erfolgreich" oben) → Zugangsdaten in den Secrets prüfen.
-- Das Forum setzt doch eine aktive Cloudflare-Challenge (Captcha/Turnstile)
-  ein, die ein einfacher Request nicht lösen kann. Melde dich dann mit
-  einem Screenshot vom Actions-Log, dann bauen wir die Playwright-Variante
-  (echter Headless-Browser) wieder ein – die kostet dann etwas mehr
-  Actions-Minuten, ist aber weiterhin die zuverlässigere Rückfalllösung.
+  alles funktioniert. Prüf danach im Tab **Code** in der Commit-Historie,
+  ob ein Commit "Zustand aktualisieren" erschienen ist – falls ja, wird der
+  Zustand korrekt gespeichert und ab jetzt läuft alles automatisch im
+  Hintergrund.
 
 ## Intervall ändern
 
