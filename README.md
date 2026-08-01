@@ -82,22 +82,21 @@ prüfen"):
 - Steht dort z.B. "Erster Lauf: 20 bestehende Threads werden gespeichert" →
   alles funktioniert, ab jetzt läuft es automatisch im Hintergrund.
 
-## Falls das Forum weiterhin blockiert (auch mit Playwright)
+## Falls das Forum weiterhin blockiert
 
-Das Skript nutzt bereits einen echten (unsichtbaren) Chromium-Browser via
-Playwright, um einfache Cloudflare-/JS-Sperren zu umgehen. Falls im Log
-trotzdem wieder die Warnung "sieht nach einer Sperrseite aus" bzw. `Keine
-Threads gefunden` erscheint, setzt das Forum vermutlich eine **aktive**
-Cloudflare-Challenge ein (z.B. ein Captcha/Turnstile), die sich nicht mehr
-automatisch lösen lässt. Melde dich dann kurz mit einem Screenshot vom
-Actions-Log, dann schauen wir gezielt weiter. Optionen wären dann z.B.:
+Das Skript ruft die Seite jetzt per einfachem eingeloggten HTTP-Request ab
+(kein Browser mehr nötig, dafür deutlich schneller und schont dein
+Actions-Minuten-Kontingent). Falls im Log trotzdem wieder die Warnung
+"sieht nach einer Sperrseite aus" bzw. `Keine Threads gefunden` erscheint,
+kann das zwei Gründe haben:
 
-- Falls du im Forum ein eigenes Konto hast und das Forum RSS pro
-  Unterforum anbietet ("RSS-Feed dieses Forums anzeigen" o.ä. Link auf der
-  Forenübersicht), wäre das die deutlich einfachere und stabilere Lösung –
-  sag mir dann die RSS-URL.
-- Ein Dienst wie ein Cloudflare-Bypass-Proxy (kostenpflichtig), falls
-  nichts anderes funktioniert.
+- Der Login hat nicht geklappt (siehe Warnung "Login war vermutlich NICHT
+  erfolgreich" oben) → Zugangsdaten in den Secrets prüfen.
+- Das Forum setzt doch eine aktive Cloudflare-Challenge (Captcha/Turnstile)
+  ein, die ein einfacher Request nicht lösen kann. Melde dich dann mit
+  einem Screenshot vom Actions-Log, dann bauen wir die Playwright-Variante
+  (echter Headless-Browser) wieder ein – die kostet dann etwas mehr
+  Actions-Minuten, ist aber weiterhin die zuverlässigere Rückfalllösung.
 
 ## Intervall ändern
 
