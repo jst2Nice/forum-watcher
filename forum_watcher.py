@@ -20,6 +20,7 @@ from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
+from playwright.sync_api import sync_playwright
 
 # ---------------------------------------------------------------------------
 # Konfiguration ueber Umgebungsvariablen (siehe README.md)
@@ -61,19 +62,36 @@ def save_seen_ids(ids: set[str]) -> None:
     STATE_FILE.write_text(json.dumps(sorted(ids)), encoding="utf-8")
 
 
+def fetch_html_via_browser() -> str:
+    """Laedt die Seite mit einem echten (headless) Chromium-Browser,
+    um einfache Cloudflare-/JS-Sperren zu umgehen."""
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context(
+            user_agent=HEADERS["User-Agent"],
+            locale="de-DE",
+            viewport={"width": 1366, "height": 900},
+        )
+        page = context.new_page()
+        page.goto(FORUM_URL, timeout=45000, wait_until="domcontentloaded")
+        # kurz warten, falls eine Cloudflare-Challenge im Hintergrund noch prueft
+        page.wait_for_timeout(4000)
+        html = page.content()
+        browser.close()
+        return html
+
+
 def fetch_threads() -> list[dict]:
     """Ruft die Forumsseite ab und gibt eine Liste von Threads zurueck."""
-    resp = requests.get(FORUM_URL, headers=HEADERS, timeout=30)
-    resp.raise_for_status()
-    html = resp.text
+    html = fetch_html_via_browser()
 
-    # Debug-Hilfe: erkennen, ob wir nur eine JS-Sperrseite bekommen haben
-    if len(html) < 2000 and "JavaScript" in html:
+    # Debug-Hilfe: erkennen, ob wir immer noch nur eine Sperrseite bekommen
+    if len(html) < 3000 and ("JavaScript" in html or "Cloudflare" in html or "Attention Required" in html):
         print(
-            "WARNUNG: Die Antwort sieht nach einer JavaScript-Sperrseite aus "
-            "(z.B. Cloudflare-Challenge). Einfaches Abrufen per requests "
-            "reicht dann nicht aus - siehe README.md, Abschnitt "
-            "'Falls das Forum blockiert'.",
+            "WARNUNG: Auch mit Browser-Simulation sieht die Antwort nach einer "
+            "Sperrseite aus (z.B. Cloudflare-Challenge/Captcha). Das laesst sich "
+            "dann nicht mehr automatisch loesen - siehe README.md, Abschnitt "
+            "'Falls das Forum weiterhin blockiert'.",
             file=sys.stderr,
         )
 

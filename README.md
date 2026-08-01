@@ -70,20 +70,22 @@ prüfen"):
 - Steht dort z.B. "Erster Lauf: 20 bestehende Threads werden gespeichert" →
   alles funktioniert, ab jetzt läuft es automatisch im Hintergrund.
 
-## Falls das Forum blockiert (Cloudflare o.ä.)
+## Falls das Forum weiterhin blockiert (auch mit Playwright)
 
-Manche Foren blocken automatisierte Anfragen (nicht nur JS-lose Browser,
-sondern auch Skripte). Falls das Log eine Warnung zeigt bzw. `Keine Threads
-gefunden` meldet:
+Das Skript nutzt bereits einen echten (unsichtbaren) Chromium-Browser via
+Playwright, um einfache Cloudflare-/JS-Sperren zu umgehen. Falls im Log
+trotzdem wieder die Warnung "sieht nach einer Sperrseite aus" bzw. `Keine
+Threads gefunden` erscheint, setzt das Forum vermutlich eine **aktive**
+Cloudflare-Challenge ein (z.B. ein Captcha/Turnstile), die sich nicht mehr
+automatisch lösen lässt. Melde dich dann kurz mit einem Screenshot vom
+Actions-Log, dann schauen wir gezielt weiter. Optionen wären dann z.B.:
 
-1. Meld dich kurz, dann bauen wir eine Variante mit einem echten Headless-
-   Browser (Playwright), der die Seite wie ein normaler Browser lädt. Das
-   ist etwas schwerer (Docker-Image nötig), aber umgeht die meisten
-   JS-Sperren.
-2. Alternative: Falls du im Forum ein eigenes Konto hast und das Forum
-   RSS pro Unterforum anbietet ("RSS-Feed dieses Forums anzeigen" o.ä.
-   Link auf der Forenübersicht), sag mir die RSS-URL – das wäre die
-   deutlich einfachere und stabilere Lösung.
+- Falls du im Forum ein eigenes Konto hast und das Forum RSS pro
+  Unterforum anbietet ("RSS-Feed dieses Forums anzeigen" o.ä. Link auf der
+  Forenübersicht), wäre das die deutlich einfachere und stabilere Lösung –
+  sag mir dann die RSS-URL.
+- Ein Dienst wie ein Cloudflare-Bypass-Proxy (kostenpflichtig), falls
+  nichts anderes funktioniert.
 
 ## Intervall ändern
 
