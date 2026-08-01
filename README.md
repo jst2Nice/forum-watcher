@@ -42,7 +42,7 @@ nur eingeloggten Nutzern angezeigt wird.
 1. Installiere die **ntfy** App (iOS App Store / Google Play).
 2. Denk dir ein einzigartiges "Topic" aus – das ist quasi dein privater
    Kanalname. Nimm etwas Zufälliges, damit niemand sonst mitliest, z.B.
-   `valentin-gta-beschwerden-a8x2k`.
+   `forum-a8x2k`.
 3. In der App: "+" → dieses Topic abonnieren.
 4. Fertig – keine Registrierung, kein Account nötig.
 
@@ -74,7 +74,7 @@ Im Repo: **Settings → Secrets and variables → Actions → New repository sec
 | `FORUM_PASSWORD` | Passwort des Bot-Accounts aus Schritt 3 |
 | `DISCORD_WEBHOOK_URL` | dein Discord-Webhook-Link |
 | `DISCORD_PING` | z.B. `<@&ROLLEN_ID>` oder `@everyone` (optional, kann auch leer bleiben) |
-| `NTFY_TOPIC` | das Topic aus Schritt 2, z.B. `valentin-gta-beschwerden-a8x2k` |
+| `NTFY_TOPIC` | das Topic aus Schritt 2, z.B. `forum-a8x2k` |
 
 Diese Secrets sind auch bei einem öffentlichen Repo nicht einsehbar – weder
 für andere Nutzer noch in den Actions-Logs (GitHub blendet sie automatisch
