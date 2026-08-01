@@ -1,5 +1,7 @@
 # Forum Watcher – Setup-Anleitung
 
+(Full Vibecoded mit Claude, bitte nicht haten)
+
 Prüft alle 5 Minuten automatisch (via GitHub Actions, kostenlos), ob im
 Unterforum "Beschwerden über Spieler" ein neues Thema erstellt wurde, und
 schickt dir dann:
