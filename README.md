@@ -30,7 +30,15 @@ schickt dir dann:
 3. In der App: "+" → dieses Topic abonnieren.
 4. Fertig – keine Registrierung, kein Account nötig.
 
-## 3. Discord-Webhook
+## 3. Forum-Account für den Bot
+
+Das Forum verlangt einen Login, um die Beiträge zu sehen. Erstell dir dafür
+am besten einen **zweiten, separaten Account** im Forum (nicht deinen
+Haupt-Account) – nur für dieses Skript. Die Zugangsdaten kommen als
+verschlüsselte Secrets ins Repo (Schritt 5), sind also nicht öffentlich
+einsehbar, aber ein zweiter Account ist trotzdem die sauberere Lösung.
+
+## 4. Discord-Webhook einrichten
 
 Du hast schon einen – trag ihn unten bei den Secrets ein. Falls du zusätzlich
 eine Rolle oder dich selbst pingen willst, brauchst du die Rollen-ID bzw.
@@ -40,17 +48,19 @@ in Discord aktiviert sein unter Einstellungen → Erweitert).
 - Person pingen: `<@123456789012345678>`
 - Alle pingen: `@everyone` (Vorsicht, weckt wirklich alle)
 
-## 4. GitHub Secrets eintragen
+## 5. GitHub Secrets eintragen
 
 Im Repo: **Settings → Secrets and variables → Actions → New repository secret**
 
 | Name | Wert |
 |---|---|
+| `FORUM_USERNAME` | Benutzername/E-Mail des Bot-Accounts aus Schritt 3 |
+| `FORUM_PASSWORD` | Passwort des Bot-Accounts aus Schritt 3 |
 | `DISCORD_WEBHOOK_URL` | dein Discord-Webhook-Link |
 | `DISCORD_PING` | z.B. `<@&ROLLEN_ID>` oder `@everyone` (optional, kann auch leer bleiben) |
 | `NTFY_TOPIC` | das Topic aus Schritt 2, z.B. `valentin-gta-beschwerden-a8x2k` |
 
-## 5. Testen
+## 6. Testen
 
 Gehe im Repo auf **Actions → Forum Watcher → Run workflow**, um es einmal
 manuell zu starten, statt 5 Minuten auf den nächsten Cron-Lauf zu warten.
@@ -65,8 +75,10 @@ manuell zu starten, statt 5 Minuten auf den nächsten Cron-Lauf zu warten.
 Schau dir nach dem ersten Lauf das Log an (Actions → der Lauf → "Forum
 prüfen"):
 
-- Steht dort nur ein Fehler bzw. die Warnung über eine
-  JavaScript-Sperrseite → siehe Abschnitt "Falls das Forum blockiert" unten.
+- Steht dort "Login war vermutlich NICHT erfolgreich" → Benutzername/Passwort
+  in den Secrets prüfen (Tippfehler? E-Mail statt Benutzername nötig?).
+- Steht dort weiterhin eine Warnung über eine Sperrseite → siehe Abschnitt
+  "Falls das Forum weiterhin blockiert" unten.
 - Steht dort z.B. "Erster Lauf: 20 bestehende Threads werden gespeichert" →
   alles funktioniert, ab jetzt läuft es automatisch im Hintergrund.
 

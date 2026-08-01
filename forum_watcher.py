@@ -34,6 +34,10 @@ DISCORD_PING = os.environ.get("DISCORD_PING", "")  # z.B. "<@&ROLLEN_ID>" oder "
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")       # z.B. "valentin-gta-beschwerden-7x2k"
 NTFY_URL = os.environ.get("NTFY_URL", "https://ntfy.sh")
 
+FORUM_USERNAME = os.environ.get("FORUM_USERNAME", "")
+FORUM_PASSWORD = os.environ.get("FORUM_PASSWORD", "")
+FORUM_LOGIN_URL = os.environ.get("FORUM_LOGIN_URL", "https://forum.gta5majestic.com/login/")
+
 STATE_FILE = Path(__file__).parent / "seen_threads.json"
 
 HEADERS = {
@@ -63,8 +67,8 @@ def save_seen_ids(ids: set[str]) -> None:
 
 
 def fetch_html_via_browser() -> str:
-    """Laedt die Seite mit einem echten (headless) Chromium-Browser,
-    um einfache Cloudflare-/JS-Sperren zu umgehen."""
+    """Loggt sich (falls Zugangsdaten gesetzt sind) ein und laedt dann die
+    Forumsseite mit einem echten (headless) Chromium-Browser."""
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(
@@ -73,12 +77,55 @@ def fetch_html_via_browser() -> str:
             viewport={"width": 1366, "height": 900},
         )
         page = context.new_page()
+
+        if FORUM_USERNAME and FORUM_PASSWORD:
+            login(page)
+
         page.goto(FORUM_URL, timeout=45000, wait_until="domcontentloaded")
         # kurz warten, falls eine Cloudflare-Challenge im Hintergrund noch prueft
         page.wait_for_timeout(4000)
         html = page.content()
         browser.close()
         return html
+
+
+def login(page) -> None:
+    """Loggt sich per Standard-XenForo-Loginformular ein."""
+    page.goto(FORUM_LOGIN_URL, timeout=45000, wait_until="domcontentloaded")
+    page.wait_for_timeout(2000)
+
+    # XenForo-Standardformular hat Felder mit name="login" und name="password"
+    try:
+        page.fill('input[name="login"]', FORUM_USERNAME, timeout=10000)
+        page.fill('input[name="password"]', FORUM_PASSWORD, timeout=10000)
+    except Exception:
+        print(
+            "WARNUNG: Login-Formularfelder wurden nicht gefunden. "
+            "Eventuell hat das Forum ein anderes Login-Formular als Standard-XenForo. "
+            "Melde dich, dann passen wir die Feld-Selektoren an.",
+            file=sys.stderr,
+        )
+        return
+
+    try:
+        page.click('button[type="submit"]', timeout=10000)
+    except Exception:
+        # Fallback: Enter-Taste im Passwortfeld
+        page.press('input[name="password"]', "Enter")
+
+    page.wait_for_timeout(4000)
+
+    # grobe Erfolgspruefung: nach erfolgreichem Login gibt es meist keinen
+    # sichtbaren Login-Link/Formular mehr
+    if page.locator('input[name="password"]').count() > 0:
+        print(
+            "WARNUNG: Login war vermutlich NICHT erfolgreich (Passwortfeld "
+            "immer noch sichtbar). Bitte Benutzername/Passwort in den "
+            "GitHub Secrets pruefen.",
+            file=sys.stderr,
+        )
+    else:
+        print("Login erfolgreich (Login-Formular nicht mehr sichtbar).")
 
 
 def fetch_threads() -> list[dict]:
